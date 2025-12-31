@@ -38,9 +38,9 @@ if video_file and audio_file:
                         .with_duration(audio_clip.duration)
                         .with_audio(audio_clip))
             clip_w_url = CompositeVideoClip([video_clip, txt_clip.with_duration(video_clip.duration)])
-            output_path = os.path.join(tmpdir, "output.mp4")
+            output_path = os.path.join(tmpdir, "output.mov")
             progress_bar.progress(70, "Rendering video...")
-            clip_w_url.write_videofile(output_path, fps=1 , codec="libx264", audio_codec="aac", audio_bitrate="320k")
+            clip_w_url.write_videofile(output_path, fps=1 , codec="libx264", audio_codec="pcm_s16le")
             video_clip.close()
             audio_clip.close()
             txt_clip.close()
@@ -55,9 +55,9 @@ if video_file and audio_file:
             looped_video = concatenate_videoclips(video_loops)
             final_clip = looped_video.subclipped(0, audio_clip.duration).with_audio(audio_clip)
             clip_w_url = CompositeVideoClip([final_clip, txt_clip.with_duration(final_clip.duration)])
-            output_path = os.path.join(tmpdir, "output.mp4")
+            output_path = os.path.join(tmpdir, "output.mov")
             progress_bar.progress(70, "Rendering video...")
-            clip_w_url.write_videofile(output_path, fps=24, codec="libx264", audio_codec="aac", audio_bitrate="320k")
+            clip_w_url.write_videofile(output_path, fps=24, codec="libx264", audio_codec="pcm_s16le")
             video_clip.close()
             audio_clip.close()
             final_clip.close()
@@ -68,4 +68,5 @@ if video_file and audio_file:
         # Present for download
         with open(output_path, "rb") as f:
             st.success("Video created! Download below.")
-            st.download_button('Download video', f, file_name="output_video.mp4", mime='video/mp4')
+
+            st.download_button('Download video', f, file_name="output_video.mov", mime='video/quicktime')
