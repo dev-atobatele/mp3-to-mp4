@@ -6,6 +6,15 @@ The background is looped or trimmed automatically to match the audio’s length,
 
 Try it online: https://mp3-to-mp4.streamlit.app/
 
+Run it locally:
+(Linux)
+
+1. Install python virtual enviroment if needed - sudo apt install python3.12-venv
+2. Create a virtual enviroment - python3 -m venv .venv
+3. Activate the vitrual enviroment - source .venv/bin/activate
+4. Install requirements - pip install -r requirements.txt
+5. Run the app - streamlit run app.py
+
 🚀 Features
 
 🎧 Flexible Input: Upload any common audio format (e.g. .mp3, .wav, .m4a, .ogg, .flac).
@@ -36,4 +45,5 @@ ffmpeg — handles all backend media processing ⚙️
 Tim Atobatele
 
 🔗 GitHub - https://github.com/dev-atobatele/ | LinkedIn - https://www.linkedin.com/in/tim-atob/
+
 
