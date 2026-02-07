@@ -5,20 +5,37 @@ import os
 
 st.title("MP3 to MP4")
 
+# Initialize session state for tracking rendered video
+if "rendered_video" not in st.session_state:
+    st.session_state.rendered_video = None
+    st.session_state.rendered_for = None  # Track which files were used
+
 # User uploads
 video_file = st.file_uploader("Upload a video, gif, or image. It will be looped and trimmed to the audio duration.", type=["mp4", "gif", "png", "jpg", "jpeg","mkv", "mov", "avi", "webm"])
 audio_file = st.file_uploader("Upload an audio track", type=["mp3", "wav", "ogg", "flac","m4a","aac","aiff"])
 progress_bar = st.progress(0)
 
-txt_clip = TextClip(
-    text="mp3-to-mp4.streamlit.app",
-    font_size=20,
-    margin=(30, 30),
-    color='white'
+# Create a unique identifier for the current file combination
+current_files_id = None
+if video_file and audio_file:
+    current_files_id = (video_file.name, video_file.size, audio_file.name, audio_file.size)
+
+# Check if we need to re-render (new files uploaded) or can use cached result
+needs_render = (
+    video_file and audio_file and 
+    st.session_state.rendered_for != current_files_id
 )
 
-if video_file and audio_file:
+if needs_render:
     progress_bar.progress(10, "Starting processing...")
+    
+    txt_clip = TextClip(
+        text="mp3-to-mp4.streamlit.app",
+        font_size=20,
+        margin=(30, 30),
+        color='white'
+    )
+    
     # Save the uploaded files to a temporary directory
     with tempfile.TemporaryDirectory() as tmpdir:
         video_path = os.path.join(tmpdir, video_file.name)
@@ -45,7 +62,6 @@ if video_file and audio_file:
             audio_clip.close()
             txt_clip.close()
             clip_w_url.close()
-            progress_bar.progress(100)
         else:
             # Process as video/gif
             video_clip = VideoFileClip(video_path)
@@ -64,9 +80,25 @@ if video_file and audio_file:
             looped_video.close()
             txt_clip.close()
             clip_w_url.close()
-            progress_bar.progress(100)
-        # Present for download
+        
+        # Cache the rendered video in session state
         with open(output_path, "rb") as f:
-            st.success("Video created! Download below.")
+            st.session_state.rendered_video = f.read()
+            st.session_state.rendered_for = current_files_id
+        
+        progress_bar.progress(100)
 
-            st.download_button('Download video', f, file_name="output_video.mov", mime='video/quicktime')
+# Show download button if we have a rendered video
+if st.session_state.rendered_video is not None:
+    st.success("Video created! Download below.")
+    st.download_button(
+        'Download video',
+        st.session_state.rendered_video,
+        file_name="output_video.mov",
+        mime='video/quicktime'
+    )
+
+# Clear cached video if files are removed
+if not video_file or not audio_file:
+    st.session_state.rendered_video = None
+    st.session_state.rendered_for = None
